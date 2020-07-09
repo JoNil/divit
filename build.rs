@@ -10,10 +10,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("cargo:rerun-if-changed=frontend/src/*");
 
     assert!(Command::new("cargo")
-        .args(&[
-            "install",
-            "wasm-pack",
-        ])
+        .args(&["install", "wasm-pack",])
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .status()?
