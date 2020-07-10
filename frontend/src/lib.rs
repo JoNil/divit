@@ -12,12 +12,14 @@ pub fn start() -> Result<(), JsValue> {
 
     document.body().unwrap().append_child(&div)?;
 
-    div.style().set_property("background-color", "black")?;
-    div.style().set_property("position", "absolute")?;
-    div.style().set_property("width", "64px")?;
-    div.style().set_property("height", "64px")?;
-    div.style().set_property("top", "40px")?;
-    div.style().set_property("left", "40px")?;
+    let div_style = div.style();
+
+    div_style.set_property("background-color", "black")?;
+    div_style.set_property("position", "absolute")?;
+    div_style.set_property("width", "64px")?;
+    div_style.set_property("height", "64px")?;
+    div_style.set_property("top", "40px")?;
+    div_style.set_property("left", "40px")?;
 
     let div = Rc::new(div);
 
@@ -25,10 +27,10 @@ pub fn start() -> Result<(), JsValue> {
         let div = div.clone();
         let closure = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
             
-            div.style()
+            div_style
                 .set_property("left", &format!("{}px", event.client_x()))
                 .unwrap();
-            div.style()
+            div_style
                 .set_property("top", &format!("{}px", event.client_y()))
                 .unwrap();
 

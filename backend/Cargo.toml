@@ -1,0 +1,13 @@
+[package]
+name = "divit"
+version = "0.1.0"
+authors = ["Jonathan Nilsson <jonathan@voysys.se>"]
+edition = "2018"
+
+[dependencies]
+actix-files = "0.2"
+actix-rt = "1"
+actix-web = "2"
+env_logger = "0.7"
+sailfish = "0.1"
+sailfish-macros = "0.1"

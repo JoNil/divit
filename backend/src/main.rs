@@ -31,6 +31,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/index.html").to(index))
             .service(web::resource("/").to(index))
             .service(Files::new("/pkg", "./pkg"))
+            .service(Files::new("/static", "./static"))
     })
     .bind("0.0.0.0:8080")?
     .run()
