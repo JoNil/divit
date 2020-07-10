@@ -1,18 +1,9 @@
-use wasm_bindgen::{closure::Closure, prelude::wasm_bindgen, JsCast, JsValue};
-use web_sys::{HtmlSpanElement, MouseEvent, EventTarget};
+use event_target_ex::EventTargetEx;
 use std::{cell::Cell, rc::Rc};
+use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
+use web_sys::HtmlSpanElement;
 
-trait EventTargetEx {
-    fn add_listner(&self, event_type: &str, callback: impl FnMut(MouseEvent) + 'static);
-}
-
-impl<AsRefEventTarget> EventTargetEx for AsRefEventTarget where AsRefEventTarget: AsRef<EventTarget> {
-    fn add_listner(&self, event_type: &str, callback: impl FnMut(MouseEvent) + 'static) {
-        let closure = Closure::wrap(Box::new(callback) as Box<dyn FnMut(_)>);
-        self.as_ref().add_event_listener_with_callback(event_type, closure.as_ref().unchecked_ref()).unwrap();
-        closure.forget();
-    }
-}
+mod event_target_ex;
 
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
@@ -37,13 +28,13 @@ pub fn start() -> Result<(), JsValue> {
 
     let down = Rc::new(Cell::new(false));
 
-    {
+    document.add_listner("mousemove", {
         let div = div.clone();
         let div_style = div_style.clone();
         let inner_document = document.clone();
         let down = down.clone();
 
-        document.add_listner("mousemove", move |event| {
+        move |event| {
             div_style
                 .set_property("left", &format!("{}px", event.client_x()))
                 .unwrap();
@@ -53,22 +44,29 @@ pub fn start() -> Result<(), JsValue> {
 
             if down.get() {
                 let new_div = div.clone_node().unwrap();
-                new_div.dyn_ref::<HtmlSpanElement>().unwrap().set_inner_text(" ");
+                new_div
+                    .dyn_ref::<HtmlSpanElement>()
+                    .unwrap()
+                    .set_inner_text(" ");
 
-                inner_document.body().unwrap().append_child(&new_div).unwrap();
+                inner_document
+                    .body()
+                    .unwrap()
+                    .append_child(&new_div)
+                    .unwrap();
             }
-        });
-    }
+        }
+    });
 
-    {
+    document.add_listner("mousedown", {
         let down = down.clone();
-        document.add_listner("mousedown", move |_| { down.set(true) });
-    }
+        move |_| down.set(true)
+    });
 
-    {
+    document.add_listner("mouseup", {
         let down = down.clone();
-        document.add_listner("mouseup", move |_| { down.set(false) });
-    }
+        move |_| down.set(false)
+    });
 
     Ok(())
 }
