@@ -9,7 +9,7 @@ use sailfish::TemplateOnce;
 #[template(path = "index.stpl")]
 struct Index;
 
-async fn index(req: HttpRequest) -> actix_web::Result<HttpResponse> {
+async fn index(_: HttpRequest) -> actix_web::Result<HttpResponse> {
 
     let body = Index
         .render_once()
@@ -30,7 +30,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Logger::default())
             .service(web::resource("/index.html").to(index))
             .service(web::resource("/").to(index))
-            .service(Files::new("/pkg", "./pkg").show_files_listing())
+            .service(Files::new("/pkg", "./pkg"))
     })
     .bind("0.0.0.0:8080")?
     .run()

@@ -8,10 +8,7 @@
   <body>
     <script type="module">
       import init from './pkg/frontend.js';
-      async function run() {
-        await init();
-      }
-      run();
+      (async () => await init())();
     </script>
     <p>Divit</p>
   </body>
