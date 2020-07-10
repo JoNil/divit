@@ -1,6 +1,18 @@
 use wasm_bindgen::{closure::Closure, prelude::wasm_bindgen, JsCast, JsValue};
-use web_sys::HtmlSpanElement;
+use web_sys::{HtmlSpanElement, MouseEvent, EventTarget};
 use std::{cell::Cell, rc::Rc};
+
+trait EventTargetEx {
+    fn add_listner(&self, event_type: &str, callback: impl FnMut(MouseEvent) + 'static);
+}
+
+impl<AsRefEventTarget> EventTargetEx for AsRefEventTarget where AsRefEventTarget: AsRef<EventTarget> {
+    fn add_listner(&self, event_type: &str, callback: impl FnMut(MouseEvent) + 'static) {
+        let closure = Closure::wrap(Box::new(callback) as Box<dyn FnMut(_)>);
+        self.as_ref().add_event_listener_with_callback(event_type, closure.as_ref().unchecked_ref()).unwrap();
+        closure.forget();
+    }
+}
 
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
@@ -31,7 +43,7 @@ pub fn start() -> Result<(), JsValue> {
         let inner_document = document.clone();
         let down = down.clone();
 
-        let closure = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
+        document.add_listner("mousemove", move |event| {
             div_style
                 .set_property("left", &format!("{}px", event.client_x()))
                 .unwrap();
@@ -45,28 +57,17 @@ pub fn start() -> Result<(), JsValue> {
 
                 inner_document.body().unwrap().append_child(&new_div).unwrap();
             }
-
-        }) as Box<dyn FnMut(_)>);
-        document.add_event_listener_with_callback("mousemove", closure.as_ref().unchecked_ref())?;
-        closure.forget();
+        });
     }
 
     {
         let down = down.clone();
-        let closure = Closure::wrap(Box::new(move |_: web_sys::MouseEvent| {
-            down.set(true);
-        }) as Box<dyn FnMut(_)>);
-        document.add_event_listener_with_callback("mousedown", closure.as_ref().unchecked_ref())?;
-        closure.forget();
+        document.add_listner("mousedown", move |_| { down.set(true) });
     }
 
     {
         let down = down.clone();
-        let closure = Closure::wrap(Box::new(move |_: web_sys::MouseEvent| {
-            down.set(false);
-        }) as Box<dyn FnMut(_)>);
-        document.add_event_listener_with_callback("mouseup", closure.as_ref().unchecked_ref())?;
-        closure.forget();
+        document.add_listner("mouseup", move |_| { down.set(false) });
     }
 
     Ok(())
