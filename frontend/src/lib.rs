@@ -1,18 +1,18 @@
 use std::rc::Rc;
-use wasm_bindgen::{JsCast, JsValue, closure::Closure, prelude::wasm_bindgen};
+use wasm_bindgen::{closure::Closure, prelude::wasm_bindgen, JsCast, JsValue};
+use web_sys::HtmlSpanElement;
 
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
     let document = web_sys::window().unwrap().document().unwrap();
-    
+
     let mut divs = Vec::new();
     let mut styles = Vec::new();
 
-    for _ in 0..16 {
-
+    for _ in 0..8 {
         let div = document
             .create_element("span")?
-            .dyn_into::<web_sys::HtmlSpanElement>()?;
+            .dyn_into::<HtmlSpanElement>()?;
 
         div.set_inner_text("Hej");
         div.set_class_name("badge badge-primary");
@@ -38,16 +38,20 @@ pub fn start() -> Result<(), JsValue> {
     {
         let styles = styles.clone();
         let closure = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
-            
             for (i, div_style) in styles.iter().enumerate() {
                 div_style
-                    .set_property("left", &format!("{}px", event.client_x() + (i % 4) as i32 * 32))
+                    .set_property(
+                        "left",
+                        &format!("{}px", event.client_x() + (i % 4) as i32 * 32),
+                    )
                     .unwrap();
                 div_style
-                    .set_property("top", &format!("{}px", event.client_y()+ (i / 4) as i32 * 24))
+                    .set_property(
+                        "top",
+                        &format!("{}px", event.client_y() + (i / 4) as i32 * 24),
+                    )
                     .unwrap();
             }
-
         }) as Box<dyn FnMut(_)>);
         document.add_event_listener_with_callback("mousemove", closure.as_ref().unchecked_ref())?;
         closure.forget();
@@ -56,11 +60,9 @@ pub fn start() -> Result<(), JsValue> {
     {
         let divs = divs.clone();
         let closure = Closure::wrap(Box::new(move |_: web_sys::MouseEvent| {
-            
             for div in &*divs {
                 div.set_class_name("badge badge-secondary");
             }
-
         }) as Box<dyn FnMut(_)>);
         document.add_event_listener_with_callback("mousedown", closure.as_ref().unchecked_ref())?;
         closure.forget();
@@ -69,11 +71,9 @@ pub fn start() -> Result<(), JsValue> {
     {
         let divs = divs.clone();
         let closure = Closure::wrap(Box::new(move |_: web_sys::MouseEvent| {
-            
             for div in &*divs {
                 div.set_class_name("badge badge-primary");
             }
-
         }) as Box<dyn FnMut(_)>);
         document.add_event_listener_with_callback("mouseup", closure.as_ref().unchecked_ref())?;
         closure.forget();
