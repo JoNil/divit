@@ -9,17 +9,16 @@ pub fn start() -> Result<(), JsValue> {
         .create_element("span")?
         .dyn_into::<HtmlSpanElement>()?;
 
-    div.set_inner_text("Hej");
+    div.set_inner_text(" ");
     div.set_class_name("badge badge-primary");
 
     document.body().unwrap().append_child(&div)?;
 
     let div_style = div.style();
 
-    //div_style.set_property("background-color", "black")?;
     div_style.set_property("position", "absolute")?;
-    //div_style.set_property("width", "64px")?;
-    //div_style.set_property("height", "64px")?;
+    div_style.set_property("width", "64px")?;
+    div_style.set_property("height", "64px")?;
     div_style.set_property("top", "40px")?;
     div_style.set_property("left", "40px")?;
 
@@ -44,7 +43,7 @@ pub fn start() -> Result<(), JsValue> {
             div.set_class_name("badge badge-primary");
 
             let new_div = div.clone_node().unwrap();
-            new_div.dyn_ref::<HtmlSpanElement>().unwrap().set_inner_text("Hej");
+            new_div.dyn_ref::<HtmlSpanElement>().unwrap().set_inner_text(" ");
 
             inner_document.body().unwrap().append_child(&new_div).unwrap();
 
