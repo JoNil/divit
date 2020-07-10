@@ -4,76 +4,57 @@ use web_sys::HtmlSpanElement;
 
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
-    let document = web_sys::window().unwrap().document().unwrap();
+    let document = Rc::new(web_sys::window().unwrap().document().unwrap());
 
-    let mut divs = Vec::new();
-    let mut styles = Vec::new();
+    let div = Rc::new(document
+        .create_element("span")?
+        .dyn_into::<HtmlSpanElement>()?);
 
-    for _ in 0..8 {
-        let div = document
-            .create_element("span")?
-            .dyn_into::<HtmlSpanElement>()?;
+    div.set_inner_text("Hej");
+    div.set_class_name("badge badge-primary");
 
-        div.set_inner_text("Hej");
-        div.set_class_name("badge badge-primary");
+    document.body().unwrap().append_child(&div)?;
 
-        document.body().unwrap().append_child(&div)?;
+    let div_style = Rc::new(div.style());
 
-        let div_style = div.style();
-
-        //div_style.set_property("background-color", "black")?;
-        div_style.set_property("position", "absolute")?;
-        //div_style.set_property("width", "64px")?;
-        //div_style.set_property("height", "64px")?;
-        div_style.set_property("top", "40px")?;
-        div_style.set_property("left", "40px")?;
-
-        divs.push(div);
-        styles.push(div_style);
-    }
-
-    let divs = Rc::new(divs);
-    let styles = Rc::new(styles);
+    //div_style.set_property("background-color", "black")?;
+    div_style.set_property("position", "absolute")?;
+    //div_style.set_property("width", "64px")?;
+    //div_style.set_property("height", "64px")?;
+    div_style.set_property("top", "40px")?;
+    div_style.set_property("left", "40px")?;
 
     {
-        let styles = styles.clone();
+        let div_style = div_style.clone();
         let closure = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
-            for (i, div_style) in styles.iter().enumerate() {
-                div_style
-                    .set_property(
-                        "left",
-                        &format!("{}px", event.client_x() + (i % 4) as i32 * 32),
-                    )
-                    .unwrap();
-                div_style
-                    .set_property(
-                        "top",
-                        &format!("{}px", event.client_y() + (i / 4) as i32 * 24),
-                    )
-                    .unwrap();
-            }
+            div_style
+                .set_property("left", &format!("{}px", event.client_x()))
+                .unwrap();
+            div_style
+                .set_property("top", &format!("{}px", event.client_y()))
+                .unwrap();
         }) as Box<dyn FnMut(_)>);
         document.add_event_listener_with_callback("mousemove", closure.as_ref().unchecked_ref())?;
         closure.forget();
     }
 
     {
-        let divs = divs.clone();
+        let div = div.clone();
+        let inner_document = document.clone();
         let closure = Closure::wrap(Box::new(move |_: web_sys::MouseEvent| {
-            for div in &*divs {
-                div.set_class_name("badge badge-secondary");
-            }
+            div.set_class_name("badge badge-secondary");
+
+            inner_document.body().unwrap().append_child(&div.clone()).unwrap();
+
         }) as Box<dyn FnMut(_)>);
         document.add_event_listener_with_callback("mousedown", closure.as_ref().unchecked_ref())?;
         closure.forget();
     }
 
     {
-        let divs = divs.clone();
+        let div = div.clone();
         let closure = Closure::wrap(Box::new(move |_: web_sys::MouseEvent| {
-            for div in &*divs {
-                div.set_class_name("badge badge-primary");
-            }
+            div.set_class_name("badge badge-primary");
         }) as Box<dyn FnMut(_)>);
         document.add_event_listener_with_callback("mouseup", closure.as_ref().unchecked_ref())?;
         closure.forget();
