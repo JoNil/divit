@@ -1,21 +1,20 @@
-use std::rc::Rc;
 use wasm_bindgen::{closure::Closure, prelude::wasm_bindgen, JsCast, JsValue};
 use web_sys::HtmlSpanElement;
 
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
-    let document = Rc::new(web_sys::window().unwrap().document().unwrap());
+    let document = web_sys::window().unwrap().document().unwrap();
 
-    let div = Rc::new(document
+    let div = document
         .create_element("span")?
-        .dyn_into::<HtmlSpanElement>()?);
+        .dyn_into::<HtmlSpanElement>()?;
 
     div.set_inner_text("Hej");
     div.set_class_name("badge badge-primary");
 
     document.body().unwrap().append_child(&div)?;
 
-    let div_style = Rc::new(div.style());
+    let div_style = div.style();
 
     //div_style.set_property("background-color", "black")?;
     div_style.set_property("position", "absolute")?;
@@ -42,9 +41,12 @@ pub fn start() -> Result<(), JsValue> {
         let div = div.clone();
         let inner_document = document.clone();
         let closure = Closure::wrap(Box::new(move |_: web_sys::MouseEvent| {
-            div.set_class_name("badge badge-secondary");
+            div.set_class_name("badge badge-primary");
 
-            inner_document.body().unwrap().append_child(&div.clone()).unwrap();
+            let new_div = div.clone_node().unwrap();
+            new_div.dyn_ref::<HtmlSpanElement>().unwrap().set_inner_text("Hej");
+
+            inner_document.body().unwrap().append_child(&new_div).unwrap();
 
         }) as Box<dyn FnMut(_)>);
         document.add_event_listener_with_callback("mousedown", closure.as_ref().unchecked_ref())?;
