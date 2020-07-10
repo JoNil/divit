@@ -10,7 +10,6 @@ use sailfish::TemplateOnce;
 struct Index;
 
 async fn index(req: HttpRequest) -> actix_web::Result<HttpResponse> {
-    println!("REQ: {:?}", req);
 
     let body = Index
         .render_once()
