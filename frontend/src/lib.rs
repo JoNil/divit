@@ -25,19 +25,12 @@ pub fn start() -> Result<(), JsValue> {
         let div = div.clone();
         let closure = Closure::wrap(Box::new(move |event: web_sys::MouseEvent| {
             
-            let target = event.target().unwrap();
-
-            if target.dyn_ref::<JsValue>() != div.dyn_ref::<JsValue>() {
-
-                div.style()
-                    .set_property("left", &format!("{}px", event.offset_x()))
-                    .unwrap();
-                div.style()
-                    .set_property("top", &format!("{}px", event.offset_y()))
-                    .unwrap();
-
-                web_sys::console::log_1(&event);
-            }
+            div.style()
+                .set_property("left", &format!("{}px", event.client_x()))
+                .unwrap();
+            div.style()
+                .set_property("top", &format!("{}px", event.client_y()))
+                .unwrap();
 
         }) as Box<dyn FnMut(_)>);
         document.add_event_listener_with_callback("mousemove", closure.as_ref().unchecked_ref())?;
