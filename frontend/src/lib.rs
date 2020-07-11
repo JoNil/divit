@@ -2,8 +2,18 @@ use event_target_ex::EventTargetEx;
 use std::{cell::Cell, rc::Rc};
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use web_sys::HtmlSpanElement;
+use valerie::{Node, App, h1, div, p};
 
 mod event_target_ex;
+
+fn ui() -> Node {
+    div!(
+        h1!("Hello, World!"),
+        p!("Hej"),
+        p!("Hej"),
+        p!("Hej")
+    ).into()
+}
 
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
@@ -67,6 +77,8 @@ pub fn start() -> Result<(), JsValue> {
         let down = down.clone();
         move |_| down.set(false)
     });
+
+    App::render_single(ui());
 
     Ok(())
 }
